@@ -1,0 +1,22 @@
+name: google_sheets
+version: 1.1.0
+description: "Read and write Google Sheets — metadata, cell ranges, row appends, and batch updates"
+author: "dataengineergaurav"
+kind: standalone
+provides_tools:
+  - get_spreadsheet_metadata
+  - list_worksheets
+  - read_range
+  - search_rows
+  - update_cells
+  - append_row
+  - batch_update
+requires_env:
+  - name: GOOGLE_SHEETS_CREDENTIALS
+    description: "Service account JSON key (file path or inline JSON) for full read/write access"
+    url: "https://cloud.google.com/iam/docs/service-accounts"
+    secret: true
+  - name: GOOGLE_SHEETS_API_KEY
+    description: "API key for read-only access to public sheets"
+    url: "https://console.cloud.google.com/apis/credentials"
+    secret: true
