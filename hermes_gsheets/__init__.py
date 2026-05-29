@@ -1,13 +1,12 @@
 """Google Sheets integration plugin — user-installed.
 
-Registers 7 tools (get_spreadsheet_metadata, list_worksheets, read_range,
-search_rows, update_cells, append_row, batch_update) into the
-``google_sheets`` toolset.
+Registers 8 tools into the ``google_sheets`` toolset.
 """
 
 from __future__ import annotations
 
 from .tools import (
+    ADD_WORKSHEET_SCHEMA,
     APPEND_ROW_SCHEMA,
     BATCH_UPDATE_SCHEMA,
     GET_SPREADSHEET_METADATA_SCHEMA,
@@ -15,6 +14,7 @@ from .tools import (
     READ_RANGE_SCHEMA,
     SEARCH_ROWS_SCHEMA,
     UPDATE_CELLS_SCHEMA,
+    _handle_add_worksheet,
     _handle_append_row,
     _handle_batch_update,
     _handle_get_spreadsheet_metadata,
@@ -29,6 +29,7 @@ _TOOLS = (
     ("list_worksheets",          LIST_WORKSHEETS_SCHEMA,          _handle_list_worksheets,          "📋"),
     ("read_range",               READ_RANGE_SCHEMA,               _handle_read_range,               "📖"),
     ("search_rows",              SEARCH_ROWS_SCHEMA,              _handle_search_rows,              "🔍"),
+    ("add_worksheet",            ADD_WORKSHEET_SCHEMA,            _handle_add_worksheet,            "🆕"),
     ("update_cells",             UPDATE_CELLS_SCHEMA,             _handle_update_cells,             "✏️"),
     ("append_row",               APPEND_ROW_SCHEMA,               _handle_append_row,               "➕"),
     ("batch_update",             BATCH_UPDATE_SCHEMA,              _handle_batch_update,              "⚡"),

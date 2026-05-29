@@ -137,6 +137,30 @@ def _handle_update_cells(args: dict, **kw) -> str:
         return _gsheets_tool_error(exc)
 
 
+def _handle_add_worksheet(args: dict, **kw) -> str:
+    spreadsheet_id = str(args.get("spreadsheet_id") or "").strip()
+    title = str(args.get("title") or "").strip()
+    if not spreadsheet_id:
+        return tool_error("spreadsheet_id is required")
+    if not title:
+        return tool_error("title is required")
+    client = _gsheets_client()
+    try:
+        sheet = client.add_worksheet(
+            spreadsheet_id,
+            title,
+            index=args.get("index"),
+            grid_rows=args.get("grid_rows", 1000),
+            grid_columns=args.get("grid_columns", 26),
+        )
+        return tool_result({
+            "success": True,
+            "sheet": sheet,
+        })
+    except Exception as exc:
+        return _gsheets_tool_error(exc)
+
+
 def _handle_append_row(args: dict, **kw) -> str:
     spreadsheet_id = str(args.get("spreadsheet_id") or "").strip()
     sheet_name = str(args.get("sheet_name") or "").strip()
@@ -313,9 +337,37 @@ APPEND_ROW_SCHEMA = {
     },
 }
 
+ADD_WORKSHEET_SCHEMA = {
+    "name": "add_worksheet",
+    "description": "Create a brand-new worksheet (tab/sheet) in a Google Spreadsheet. Requires service account auth (API key is read-only).",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "spreadsheet_id": SPREADSHEET_ID,
+            "title": {
+                "type": "string",
+                "description": "Title for the new worksheet tab.",
+            },
+            "index": {
+                "type": "integer",
+                "description": "0-based position to insert the sheet; omitted = last position.",
+            },
+            "grid_rows": {
+                "type": "integer",
+                "description": "Number of rows for the new sheet (default: 1000).",
+            },
+            "grid_columns": {
+                "type": "integer",
+                "description": "Number of columns for the new sheet (default: 26).",
+            },
+        },
+        "required": ["spreadsheet_id", "title"],
+    },
+}
+
 BATCH_UPDATE_SCHEMA = {
     "name": "batch_update",
-    "description": "Execute multiple sheet operations in a single API call for efficiency. Supports: update_cells, append_cells, delete_rows, insert_rows, update_sheet_properties.",
+    "description": "Execute multiple sheet operations in a single API call for efficiency. Supports: update_cells, append_cells, delete_rows, insert_rows, update_sheet_properties, add_sheet.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -329,7 +381,7 @@ BATCH_UPDATE_SCHEMA = {
                     "properties": {
                         "type": {
                             "type": "string",
-                            "enum": ["update_cells", "append_cells", "delete_rows", "insert_rows", "update_sheet_properties"],
+                            "enum": ["update_cells", "append_cells", "delete_rows", "insert_rows", "update_sheet_properties", "add_sheet"],
                         },
                         "sheet_id": {"type": "integer", "description": "Sheet ID (from list_worksheets) - defaults to 0"},
                         "range": {"type": "string", "description": "A1 range for update_cells"},
@@ -342,7 +394,10 @@ BATCH_UPDATE_SCHEMA = {
                         "start_index": {"type": "integer", "description": "Start index for delete_rows/insert_rows"},
                         "end_index": {"type": "integer", "description": "End index for delete_rows/insert_rows"},
                         "inherit_before": {"type": "boolean", "description": "For insert_rows: whether new row inherits properties from the row before"},
-                        "title": {"type": "string", "description": "New title for update_sheet_properties"},
+                        "title": {"type": "string", "description": "New title for update_sheet_properties / add_sheet"},
+                        "grid_rows": {"type": "integer", "description": "Row count for add_sheet (default: 1000)"},
+                        "grid_columns": {"type": "integer", "description": "Column count for add_sheet (default: 26)"},
+                        "index": {"type": "integer", "description": "0-based position for add_sheet"},
                     },
                     "required": ["type"],
                 },

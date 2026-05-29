@@ -40,7 +40,10 @@ class GoogleSheetsAPIError(GoogleSheetsError):
 
 
 _API_BASE = "https://sheets.googleapis.com/v4/spreadsheets"
-_SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+_SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+]
 
 
 class GoogleSheetsClient:
@@ -180,6 +183,43 @@ class GoogleSheetsClient:
 
     def get_spreadsheet_metadata(self, spreadsheet_id: str) -> dict:
         return self._request("GET", f"/{spreadsheet_id}")
+
+    def add_worksheet(
+        self,
+        spreadsheet_id: str,
+        title: str,
+        *,
+        index: int | None = None,
+        grid_rows: int = 1000,
+        grid_columns: int = 26,
+    ) -> dict:
+        payload = {
+            "addSheet": {
+                "properties": {
+                    "title": title,
+                    "gridProperties": {
+                        "rowCount": grid_rows,
+                        "columnCount": grid_columns,
+                    },
+                },
+            },
+        }
+        if index is not None:
+            payload["addSheet"]["properties"]["index"] = index
+        result = self._request(
+            "POST",
+            f"/{spreadsheet_id}:batchUpdate",
+            json_body={"requests": [payload]},
+        )
+        props = result["replies"][0]["addSheet"]["properties"]
+        return {
+            "sheet_id": props.get("sheetId"),
+            "title": props.get("title"),
+            "index": props.get("index"),
+            "sheet_type": props.get("sheetType", "GRID"),
+            "grid_rows": props.get("gridProperties", {}).get("rowCount"),
+            "grid_columns": props.get("gridProperties", {}).get("columnCount"),
+        }
 
     def list_worksheets(self, spreadsheet_id: str) -> list:
         data = self._request("GET", f"/{spreadsheet_id}")
@@ -324,6 +364,19 @@ class GoogleSheetsClient:
                         "fields": "title",
                     }
                 })
+            elif op_type == "add_sheet":
+                props = {
+                    "title": op.get("title", "New Sheet"),
+                    "gridProperties": {
+                        "rowCount": op.get("grid_rows", 1000),
+                        "columnCount": op.get("grid_columns", 26),
+                    },
+                }
+                if op.get("index") is not None:
+                    props["index"] = op["index"]
+                if op.get("sheet_id") is not None:
+                    props["sheetId"] = op["sheet_id"]
+                requests.append({"addSheet": {"properties": props}})
         return self._request(
             "POST",
             f"/{spreadsheet_id}:batchUpdate",

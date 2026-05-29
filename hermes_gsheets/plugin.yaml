@@ -8,6 +8,7 @@ provides_tools:
   - list_worksheets
   - read_range
   - search_rows
+  - add_worksheet
   - update_cells
   - append_row
   - batch_update

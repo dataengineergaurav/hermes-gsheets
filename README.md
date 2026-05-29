@@ -2,7 +2,7 @@
 
 Google Sheets plugin for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 Read/write spreadsheet metadata, worksheet lists, cell ranges, search rows,
-append rows, and execute batch updates.
+create worksheets, append rows, and execute batch updates.
 
 ## Install
 
@@ -57,9 +57,10 @@ GOOGLE_SHEETS_API_KEY=AIza...
 | `list_worksheets` | Sheet IDs, types, row/column counts |
 | `read_range` | Read cell values as 2D array from an A1 range |
 | `search_rows` | Client-side substring search across rows |
+| `add_worksheet` | Create a brand-new worksheet tab (requires service account) |
 | `update_cells` | Write values to a specified range |
 | `append_row` | Append a single row of values |
-| `batch_update` | Multiple operations (update, append, delete/insert rows, rename sheets) in one API call |
+| `batch_update` | Multiple operations (update, append, delete/insert rows, rename sheets, add sheets) in one API call |
 
 ## Platform access
 
